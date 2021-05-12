@@ -42,6 +42,17 @@ const userSchema = new mongoose.Schema({
     }]
 });
 
+//lock down password and tokens on INSTANCE of user, 'toJSON' required
+userSchema.methods.toJSON = function () {
+    const user = this;
+    const userObject = user.toObject();
+
+    delete userObject.password;
+    delete userObject.tokens;
+
+    return userObject;
+};
+
 // Generate Token, available on INSTANCE of user
 userSchema.methods.generateAuthToken = async function () {
     const user = this;
@@ -53,7 +64,7 @@ userSchema.methods.generateAuthToken = async function () {
     return token;
 };
 
-// Find by credential
+// Find by credential on MODEL of user
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({ email });
 
