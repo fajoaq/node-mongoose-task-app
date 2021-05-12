@@ -32,6 +32,31 @@ router.post('/users/login', async (req, res) => {
     }
 });
 
+//Log Out
+router.post('/users/logout', auth, async(req, res) => {
+    try {
+        req.user.tokens = req.user.tokens.filter((token) => token.token !== req.token);
+        await req.user.save();
+
+        res.send();
+    } catch (err) {
+        res.status(500).send();
+    }
+});
+
+//Log Out all sessions
+router.post('/users/logoutall', auth, async(req, res) => {
+    try {
+        req.user.tokens = [];
+        await req.user.save();
+
+        res.send();
+    } catch (err) {
+        res.status(500).send();
+    }
+});
+
+// Get Profile
 router.get('/users/me', auth, async (req, res) => {
     res.send(req.user);
 });
