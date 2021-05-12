@@ -42,6 +42,13 @@ const userSchema = new mongoose.Schema({
     }]
 });
 
+//virtual attribute, relationship between User and Task
+userSchema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'owner'
+});
+
 //lock down password and tokens on INSTANCE of user, 'toJSON' required
 userSchema.methods.toJSON = function () {
     const user = this;

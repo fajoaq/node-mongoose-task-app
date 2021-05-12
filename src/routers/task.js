@@ -1,12 +1,17 @@
 const express = require('express');
 
 const router = new express.Router();
+const auth = require('../middleware/auth');
 const Task = require('../models/task');
 
 /// TASK GET/POST
 
-router.post('/tasks', async (req, res) => {
-    const task = new Task(req.body);
+// Create
+router.post('/tasks', auth, async (req, res) => {
+    const task = new Task({
+        ...req.body,
+        owner: req.user._id
+    })
 
     try {
         await task.save();
@@ -17,6 +22,7 @@ router.post('/tasks', async (req, res) => {
     }
 });
 
+// Get all tasks
 router.get('/tasks', async (req, res) => {
     try {
         let tasks = await Task.find({});
@@ -29,11 +35,12 @@ router.get('/tasks', async (req, res) => {
     }
 });
 
-router.get('/tasks/:id', async (req, res) => {
+//Get task by id
+router.get('/tasks/:id', auth, async (req, res) => {
     const _id = req.params.id;
 
     try {
-        let task = await Task.findById(_id);
+        let task = await Task.findOne({ _id, owner: req.user._id });
 
         if(!task) return res.status(404).send();
 
