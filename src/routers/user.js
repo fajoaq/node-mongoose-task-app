@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 
 const router = new express.Router();
 const auth = require('../middleware/auth');
@@ -59,6 +60,13 @@ router.post('/users/logoutall', auth, async(req, res) => {
 // Get Profile
 router.get('/users/me', auth, async (req, res) => {
     res.send(req.user);
+});
+
+// Upload profile picture
+const upload = multer({ dest: 'avatars' });
+
+router.post('/users/me/avatar', upload.single('avatar'), (req, res) => {
+    res.send();
 });
 
 // USER UPDATE
