@@ -42,6 +42,8 @@ const userSchema = new mongoose.Schema({
             required: true
         }
     }]
+}, {
+    timestamps: true
 });
 
 //virtual attribute, relationship between User and Task
