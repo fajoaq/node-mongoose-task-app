@@ -63,8 +63,7 @@ router.get('/users/me', auth, async (req, res) => {
 });
 
 // Upload profile picture
-const upload = multer({ 
-    dest: 'avatars', 
+const upload = multer({
     limits: {
         fileSize: 1000000,
     },
@@ -77,11 +76,30 @@ const upload = multer({
     }
 });
 
-router.post('/users/me/avatar', upload.single('avatar'), (req, res) => {
+router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
+    req.user.avatar = req.file.buffer;
+    await req.user.save();
+
     res.send();
 }, (err, req, res, next) => {
     res.status(400).send({ error: err.message })
 });
+
+/// DELETE user profile picture
+
+router.delete('/users/me/avatar', auth, async (req, res) => {
+    if(!req.user.avatar) res.status(400).send('No avatar found.');
+    
+    try {
+        req.user.avatar = undefined;
+        await req.user.save();
+
+        res.send();
+    } catch (err) {
+        res.status(500).send(err);
+    }
+});
+
 ///
 
 // USER UPDATE
