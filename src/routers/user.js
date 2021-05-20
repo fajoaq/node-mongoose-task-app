@@ -62,7 +62,7 @@ router.get('/users/me', auth, async (req, res) => {
     res.send(req.user);
 });
 
-// Upload profile picture
+// Upload user profile picture
 const upload = multer({
     limits: {
         fileSize: 1000000,
@@ -85,6 +85,20 @@ router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) 
     res.status(400).send({ error: err.message })
 });
 
+/// Fetch user profile picture
+router.get('/users/:id/avatar', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if(!user || !user.avatar) throw new Error();
+
+        res.set('Content-Type', 'image/jpg');
+        res.send(user.avatar);
+    } catch (err) {
+        res.status(404).send();
+    }
+});
+
 /// DELETE user profile picture
 
 router.delete('/users/me/avatar', auth, async (req, res) => {
@@ -99,8 +113,6 @@ router.delete('/users/me/avatar', auth, async (req, res) => {
         res.status(500).send(err);
     }
 });
-
-///
 
 // USER UPDATE
 router.patch('/users/me', auth, async (req, res) => {
