@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const sharp = require('sharp');
 
+const { sendWelcomeEmail, sendUnsubEmail } = require('../emails/account');
 const router = new express.Router();
 const auth = require('../middleware/auth');
 const User = require('../models/user');
@@ -15,6 +16,10 @@ router.post('/users', async (req, res) => {
         const token = await user.generateAuthToken();
 
         await user.save();
+        sendWelcomeEmail(user.email, user.name, {
+            subject: "Welcome to the app!",
+            text: 'Welcome to the app! '
+        });
 
         res.status(201).send({ user, token });
     } catch(err) {
@@ -140,6 +145,10 @@ router.patch('/users/me', auth, async (req, res) => {
 router.delete('/users/me', auth, async (req, res) => {
     try {
         await  req.user.remove();
+        sendUnsubEmail(req.user.email, req.user.name, {
+            subject: "Sorry to see you go!",
+            text: "How could we have made the service better for you?"
+        });
         
         res.send(req.user);
     } catch (err) {
