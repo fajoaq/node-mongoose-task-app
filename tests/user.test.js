@@ -26,3 +26,17 @@ test('Should sign up a new user', async () => {
         password: 'MyPass777!'
     }).expect(201);
 });
+
+test('Should log in existing user', async () => {
+    await request(app).post('/users/login').send({
+        email: 'francistester@testingtest.com',
+        password: '56What!!'
+    }).expect(200);
+});
+
+test('Should not log in nonexistant user/bad credentials', async () => {
+    await request(app).post('/users/login').send({
+        email: userOne.email,
+        password: 'wrongpassword!'
+    }).expect(400);
+});
