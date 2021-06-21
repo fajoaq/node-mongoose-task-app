@@ -1,4 +1,6 @@
 const express = require('express');
+const multer = require('multer');
+const sharp = require('sharp');
 
 const router = new express.Router();
 const auth = require('../middleware/auth');
@@ -20,6 +22,34 @@ router.post('/tasks', auth, async (req, res) => {
     } catch (err) {
         res.status(400).send(err);
     }
+});
+
+//UPLOAD TASK IMAGE
+const upload = multer({
+    limits: {
+        fileSize: 500000,
+    },
+    fileFilter(req, file, callback) {
+        if( !file.originalname.match(/\.(jpg|jpeg|png)$/) ) {
+            return callback(new Error('Please upload a JPG, JPEG, or PNG file.'))
+        }
+
+        callback(undefined, true)
+    }
+});
+
+router.post('/tasks/:id/image', auth, upload.single('taskImage'), async (req, res) => {
+    let task = await Task.findOne({ _id: req.params.id, owner: req.user._id });
+
+    if(!task) return res.status(404).send();
+
+    const buffer = await sharp(req.file.buffer).resize({width: 400, height: 400}).png().toBuffer()
+    task.taskImage = buffer;
+    await task.save();
+
+    res.send();
+}, (err, req, res, next) => {
+    res.status(400).send({ error: err.message })
 });
 
 // GET /tasks?completed=true
